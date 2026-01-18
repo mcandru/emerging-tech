@@ -468,96 +468,25 @@
 
     <script>
       // Coffee shop data
-      const coffeeShops = [
-        {
-          id: 1,
-          name: "3fe Coffee",
-          type: "Specialty Roaster",
-          address: "32 Grand Canal Street Lower, Dublin 2",
-          lat: 53.3391,
-          lng: -6.2418,
-          rating: 4.8,
-          tags: ["specialty", "wifi", "roastery"],
-          description: "Award-winning specialty coffee roasters",
-        },
-        {
-          id: 2,
-          name: "Kaph",
-          type: "Specialty Café",
-          address: "31 Drury Street, Dublin 2",
-          lat: 53.3425,
-          lng: -6.2633,
-          rating: 4.7,
-          tags: ["specialty", "cozy", "brunch"],
-          description: "Minimalist café with excellent brews",
-        },
-        {
-          id: 3,
-          name: "Clement & Pekoe",
-          type: "Tea & Coffee House",
-          address: "50 South William Street, Dublin 2",
-          lat: 53.3421,
-          lng: -6.2629,
-          rating: 4.6,
-          tags: ["specialty", "cozy"],
-          description: "Artisan tea and coffee specialists",
-        },
-        {
-          id: 4,
-          name: "Two Boys Brew",
-          type: "Specialty Café",
-          address: "375 North Circular Road, Dublin 7",
-          lat: 53.3565,
-          lng: -6.268,
-          rating: 4.7,
-          tags: ["specialty", "brunch", "wifi"],
-          description: "Neighborhood gem with great food",
-        },
-        {
-          id: 5,
-          name: "Network Café",
-          type: "Community Café",
-          address: "39 Aungier Street, Dublin 2",
-          lat: 53.3397,
-          lng: -6.2657,
-          rating: 4.5,
-          tags: ["wifi", "cozy", "brunch"],
-          description: "Social enterprise café with heart",
-        },
-        {
-          id: 6,
-          name: "Brother Hubbard North",
-          type: "Café & Restaurant",
-          address: "153 Capel Street, Dublin 1",
-          lat: 53.3478,
-          lng: -6.2673,
-          rating: 4.6,
-          tags: ["brunch", "cozy"],
-          description: "Middle Eastern inspired brunch spot",
-        },
-        {
-          id: 7,
-          name: "Shoe Lane Coffee",
-          type: "Specialty Café",
-          address: "Tara Building, Tara Street, Dublin 2",
-          lat: 53.3462,
-          lng: -6.2545,
-          rating: 4.5,
-          tags: ["specialty", "wifi"],
-          description: "Modern café in creative workspace",
-        },
-        {
-          id: 8,
-          name: "Vice Coffee Inc.",
-          type: "Specialty Roaster",
-          address: "54 Middle Abbey Street, Dublin 1",
-          lat: 53.3485,
-          lng: -6.2605,
-          rating: 4.6,
-          tags: ["specialty", "wifi", "roastery"],
-          description: "Industrial chic coffee roasters",
-        },
-      ];
+      let coffeeShops = [];
+
+      // Fetch coffee shops from JSON file
+      fetch('coffee-shops.json')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to load coffee shops data');
+          }
+          return response.json();
+        })
+        .then(data => {
+          coffeeShops = data;
+          renderCoffeeList(coffeeShops);
+        })
+        .catch(error => {
+          console.error('Error loading coffee shops:', error);
+          document.getElementById('coffee-list').innerHTML = 
+            '<p style="padding: 2rem; text-align: center; color: var(--roast);">Failed to load coffee shops. Please refresh the page.</p>';
+        });
 
       let map;
       const markers = {};
@@ -748,8 +677,7 @@
         updateMarkerVisibility(filtered);
       });
 
-      // Initial render
-      renderCoffeeList(coffeeShops);
+      // Initial render is triggered by fetch
     </script>
   </body>
 </html>
