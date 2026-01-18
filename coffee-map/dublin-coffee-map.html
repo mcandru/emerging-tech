@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dublin Coffee Map</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --espresso: #2c1810;
+        --crema: #d4a574;
+        --milk: #f5f0e8;
+        --steam: #e8e0d5;
+        --roast: #8b4513;
+        --accent: #c4956a;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: var(--milk);
+        color: var(--espresso);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Grain texture overlay */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        opacity: 0.03;
+        pointer-events: none;
+        z-index: 1000;
+      }
+
+      header {
+        padding: 2rem 3rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--steam);
+        background: linear-gradient(180deg, var(--milk) 0%, transparent 100%);
+        position: relative;
+        z-index: 10;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .logo-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--espresso);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .logo-icon::before {
+        content: "☕";
+        font-size: 1.5rem;
+        filter: grayscale(1) brightness(2);
+      }
+
+      .logo-icon::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          45deg,
+          transparent 40%,
+          rgba(255, 255, 255, 0.1) 50%,
+          transparent 60%
+        );
+        animation: shimmer 3s infinite;
+      }
+
+      @keyframes shimmer {
+        0% {
+          transform: translateX(-100%) rotate(45deg);
+        }
+        100% {
+          transform: translateX(100%) rotate(45deg);
+        }
+      }
+
+      h1 {
+        font-family: "Playfair Display", serif;
+        font-size: 1.8rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+
+      h1 span {
+        color: var(--crema);
+      }
+
+      .tagline {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: var(--roast);
+        opacity: 0.7;
+      }
+
+      .coffee-count {
+        background: var(--espresso);
+        color: var(--milk);
+        padding: 0.75rem 1.5rem;
+        border-radius: 100px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .coffee-count::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        background: var(--crema);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.5;
+          transform: scale(1.2);
+        }
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: 380px 1fr;
+        height: calc(100vh - 100px);
+      }
+
+      .sidebar {
+        background: var(--milk);
+        border-right: 1px solid var(--steam);
+        overflow-y: auto;
+        padding: 1.5rem;
+      }
+
+      .sidebar::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .sidebar::-webkit-scrollbar-track {
+        background: var(--steam);
+      }
+
+      .sidebar::-webkit-scrollbar-thumb {
+        background: var(--crema);
+        border-radius: 3px;
+      }
+
+      .search-box {
+        position: relative;
+        margin-bottom: 1.5rem;
+      }
+
+      .search-box input {
+        width: 100%;
+        padding: 1rem 1rem 1rem 3rem;
+        border: 2px solid var(--steam);
+        border-radius: 12px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        background: white;
+        transition: all 0.3s ease;
+      }
+
+      .search-box input:focus {
+        outline: none;
+        border-color: var(--crema);
+        box-shadow: 0 4px 20px rgba(196, 149, 106, 0.15);
+      }
+
+      .search-box::before {
+        content: "🔍";
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1rem;
+        opacity: 0.5;
+      }
+
+      .filter-pills {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+      }
+
+      .pill {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--steam);
+        border-radius: 100px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+      }
+
+      .pill:hover,
+      .pill.active {
+        background: var(--espresso);
+        color: var(--milk);
+        border-color: var(--espresso);
+      }
+
+      .coffee-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .coffee-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.25rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid transparent;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .coffee-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--crema);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+      }
+
+      .coffee-card:hover {
+        transform: translateX(4px);
+        box-shadow: 0 8px 30px rgba(44, 24, 16, 0.08);
+        border-color: var(--steam);
+      }
+
+      .coffee-card:hover::before {
+        transform: scaleY(1);
+      }
+
+      .coffee-card.active {
+        border-color: var(--crema);
+        box-shadow: 0 8px 30px rgba(196, 149, 106, 0.2);
+      }
+
+      .coffee-card.active::before {
+        transform: scaleY(1);
+        background: var(--espresso);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+      }
+
+      .coffee-name {
+        font-family: "Playfair Display", serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+
+      .coffee-type {
+        font-size: 0.75rem;
+        color: var(--roast);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .rating {
+        background: var(--steam);
+        padding: 0.35rem 0.65rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .rating::before {
+        content: "★";
+        color: var(--crema);
+      }
+
+      .coffee-address {
+        font-size: 0.85rem;
+        color: var(--espresso);
+        opacity: 0.7;
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+      }
+
+      .coffee-tags {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .tag {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.6rem;
+        background: var(--steam);
+        border-radius: 6px;
+        color: var(--espresso);
+      }
+
+      #map {
+        height: 100%;
+        width: 100%;
+        background: var(--steam);
+      }
+
+      /* Map styles */
+      #map {
+        height: 100%;
+        width: 100%;
+        background: var(--steam);
+        z-index: 1;
+      }
+
+      .leaflet-popup-content-wrapper {
+        border-radius: 12px !important;
+        box-shadow: 0 8px 30px rgba(44, 24, 16, 0.15) !important;
+      }
+
+      .leaflet-popup-content {
+        margin: 12px 14px !important;
+        font-family: "DM Sans", sans-serif !important;
+      }
+
+      .leaflet-popup-content h4 {
+        font-family: "Playfair Display", serif !important;
+        font-size: 1rem !important;
+        margin: 0 0 4px 0 !important;
+        color: var(--espresso) !important;
+      }
+
+      .leaflet-popup-content p {
+        font-size: 0.8rem !important;
+        color: var(--roast) !important;
+        margin: 0 !important;
+      }
+
+      .leaflet-popup-tip {
+        background: white !important;
+      }
+
+      .coffee-icon {
+        background: var(--espresso);
+        border: 3px solid var(--milk);
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        box-shadow: 0 4px 15px rgba(44, 24, 16, 0.3);
+      }
+
+      .coffee-icon.active {
+        background: var(--crema);
+        transform: scale(1.2);
+      }
+
+      /* Responsive */
+      @media (max-width: 900px) {
+        main {
+          grid-template-columns: 1fr;
+          grid-template-rows: 50vh 1fr;
+        }
+
+        .sidebar {
+          order: 2;
+          border-right: none;
+          border-top: 1px solid var(--steam);
+        }
+
+        #map {
+          order: 1;
+        }
+
+        header {
+          padding: 1rem 1.5rem;
+        }
+
+        h1 {
+          font-size: 1.4rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <div class="logo-icon"></div>
+        <div>
+          <h1>Dublin <span>Coffee</span> Map</h1>
+          <p class="tagline">Discover the best brews in the city</p>
+        </div>
+      </div>
+      <div class="coffee-count"><span id="count">8</span> Coffee Spots</div>
+    </header>
+
+    <main>
+      <aside class="sidebar">
+        <div class="search-box">
+          <input type="text" placeholder="Search coffee shops..." id="search" />
+        </div>
+        <div class="filter-pills">
+          <span class="pill active" data-filter="all">All</span>
+          <span class="pill" data-filter="specialty">Specialty</span>
+          <span class="pill" data-filter="cozy">Cozy</span>
+          <span class="pill" data-filter="wifi">Good WiFi</span>
+          <span class="pill" data-filter="brunch">Brunch</span>
+        </div>
+        <div class="coffee-list" id="coffee-list">
+          <!-- Cards will be generated by JS -->
+        </div>
+      </aside>
+      <div id="map"></div>
+    </main>
+
+    <script>
+      // Coffee shop data
+      const coffeeShops = [
+        {
+          id: 1,
+          name: "3fe Coffee",
+          type: "Specialty Roaster",
+          address: "32 Grand Canal Street Lower, Dublin 2",
+          lat: 53.3391,
+          lng: -6.2418,
+          rating: 4.8,
+          tags: ["specialty", "wifi", "roastery"],
+          description: "Award-winning specialty coffee roasters",
+        },
+        {
+          id: 2,
+          name: "Kaph",
+          type: "Specialty Café",
+          address: "31 Drury Street, Dublin 2",
+          lat: 53.3425,
+          lng: -6.2633,
+          rating: 4.7,
+          tags: ["specialty", "cozy", "brunch"],
+          description: "Minimalist café with excellent brews",
+        },
+        {
+          id: 3,
+          name: "Clement & Pekoe",
+          type: "Tea & Coffee House",
+          address: "50 South William Street, Dublin 2",
+          lat: 53.3421,
+          lng: -6.2629,
+          rating: 4.6,
+          tags: ["specialty", "cozy"],
+          description: "Artisan tea and coffee specialists",
+        },
+        {
+          id: 4,
+          name: "Two Boys Brew",
+          type: "Specialty Café",
+          address: "375 North Circular Road, Dublin 7",
+          lat: 53.3565,
+          lng: -6.268,
+          rating: 4.7,
+          tags: ["specialty", "brunch", "wifi"],
+          description: "Neighborhood gem with great food",
+        },
+        {
+          id: 5,
+          name: "Network Café",
+          type: "Community Café",
+          address: "39 Aungier Street, Dublin 2",
+          lat: 53.3397,
+          lng: -6.2657,
+          rating: 4.5,
+          tags: ["wifi", "cozy", "brunch"],
+          description: "Social enterprise café with heart",
+        },
+        {
+          id: 6,
+          name: "Brother Hubbard North",
+          type: "Café & Restaurant",
+          address: "153 Capel Street, Dublin 1",
+          lat: 53.3478,
+          lng: -6.2673,
+          rating: 4.6,
+          tags: ["brunch", "cozy"],
+          description: "Middle Eastern inspired brunch spot",
+        },
+        {
+          id: 7,
+          name: "Shoe Lane Coffee",
+          type: "Specialty Café",
+          address: "Tara Building, Tara Street, Dublin 2",
+          lat: 53.3462,
+          lng: -6.2545,
+          rating: 4.5,
+          tags: ["specialty", "wifi"],
+          description: "Modern café in creative workspace",
+        },
+        {
+          id: 8,
+          name: "Vice Coffee Inc.",
+          type: "Specialty Roaster",
+          address: "54 Middle Abbey Street, Dublin 1",
+          lat: 53.3485,
+          lng: -6.2605,
+          rating: 4.6,
+          tags: ["specialty", "wifi", "roastery"],
+          description: "Industrial chic coffee roasters",
+        },
+      ];
+
+      let map;
+      const markers = {};
+
+      // Load Leaflet CSS
+      const leafletCSS = document.createElement("link");
+      leafletCSS.rel = "stylesheet";
+      leafletCSS.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+      document.head.appendChild(leafletCSS);
+
+      // Load Leaflet JS
+      const leafletJS = document.createElement("script");
+      leafletJS.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+      leafletJS.onload = initMap;
+      document.head.appendChild(leafletJS);
+
+      function initMap() {
+        // Initialize map
+        map = L.map("map", {
+          zoomControl: true,
+        }).setView([53.3458, -6.26], 14);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution:
+            '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 19,
+        }).addTo(map);
+
+        // Create custom icon
+        function createIcon(isActive = false) {
+          return L.divIcon({
+            className: "coffee-marker",
+            html: `<div class="coffee-icon ${isActive ? "active" : ""}">☕</div>`,
+            iconSize: [36, 36],
+            iconAnchor: [18, 18],
+            popupAnchor: [0, -20],
+          });
+        }
+
+        // Add markers
+        coffeeShops.forEach((shop) => {
+          const marker = L.marker([shop.lat, shop.lng], {
+            icon: createIcon(),
+          }).addTo(map);
+
+          marker.bindPopup(`
+                    <h4>${shop.name}</h4>
+                    <p>${shop.description}</p>
+                `);
+
+          marker.on("click", () => {
+            setActiveShop(shop.id);
+          });
+
+          markers[shop.id] = { marker, createIcon };
+        });
+      }
+
+      // Generate coffee cards
+      function renderCoffeeList(shops) {
+        const list = document.getElementById("coffee-list");
+        list.innerHTML = shops
+          .map(
+            (shop) => `
+                <div class="coffee-card" data-id="${shop.id}">
+                    <div class="card-header">
+                        <div>
+                            <div class="coffee-name">${shop.name}</div>
+                            <div class="coffee-type">${shop.type}</div>
+                        </div>
+                        <div class="rating">${shop.rating}</div>
+                    </div>
+                    <div class="coffee-address">${shop.address}</div>
+                    <div class="coffee-tags">
+                        ${shop.tags.map((tag) => `<span class="tag">${tag}</span>`).join("")}
+                    </div>
+                </div>
+            `,
+          )
+          .join("");
+
+        document.querySelectorAll(".coffee-card").forEach((card) => {
+          card.addEventListener("click", () => {
+            const id = parseInt(card.dataset.id);
+            setActiveShop(id);
+          });
+        });
+
+        document.getElementById("count").textContent = shops.length;
+      }
+
+      // Set active shop
+      function setActiveShop(id) {
+        document.querySelectorAll(".coffee-card").forEach((card) => {
+          card.classList.toggle("active", parseInt(card.dataset.id) === id);
+        });
+
+        // Update markers if map is ready
+        if (map && markers[id]) {
+          Object.entries(markers).forEach(
+            ([markerId, { marker, createIcon }]) => {
+              marker.setIcon(createIcon(parseInt(markerId) === id));
+            },
+          );
+
+          const shop = coffeeShops.find((s) => s.id === id);
+          if (shop) {
+            map.panTo([shop.lat, shop.lng]);
+            markers[id].marker.openPopup();
+          }
+        }
+
+        const activeCard = document.querySelector(
+          `.coffee-card[data-id="${id}"]`,
+        );
+        if (activeCard) {
+          activeCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      }
+
+      // Filter functionality
+      document.querySelectorAll(".pill").forEach((pill) => {
+        pill.addEventListener("click", () => {
+          document
+            .querySelectorAll(".pill")
+            .forEach((p) => p.classList.remove("active"));
+          pill.classList.add("active");
+
+          const filter = pill.dataset.filter;
+          if (filter === "all") {
+            renderCoffeeList(coffeeShops);
+            updateMarkerVisibility(coffeeShops);
+          } else {
+            const filtered = coffeeShops.filter((shop) =>
+              shop.tags.includes(filter),
+            );
+            renderCoffeeList(filtered);
+            updateMarkerVisibility(filtered);
+          }
+        });
+      });
+
+      function updateMarkerVisibility(visibleShops) {
+        if (!map) return;
+        const visibleIds = visibleShops.map((s) => s.id);
+        Object.entries(markers).forEach(([id, { marker }]) => {
+          if (visibleIds.includes(parseInt(id))) {
+            marker.addTo(map);
+          } else {
+            marker.remove();
+          }
+        });
+      }
+
+      // Search functionality
+      document.getElementById("search").addEventListener("input", (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = coffeeShops.filter(
+          (shop) =>
+            shop.name.toLowerCase().includes(query) ||
+            shop.address.toLowerCase().includes(query) ||
+            shop.type.toLowerCase().includes(query),
+        );
+        renderCoffeeList(filtered);
+        updateMarkerVisibility(filtered);
+      });
+
+      // Initial render
+      renderCoffeeList(coffeeShops);
+    </script>
+  </body>
+</html>
