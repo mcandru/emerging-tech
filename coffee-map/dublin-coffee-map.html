@@ -406,7 +406,6 @@
 
       .coffee-icon.active {
         background: var(--crema);
-        transform: scale(1.2);
       }
 
       /* Responsive */
@@ -616,6 +615,13 @@
 
           markers[shop.id] = { marker, createIcon };
         });
+
+        // Clear selection when clicking on map
+        map.on("click", (e) => {
+          if (!e.originalEvent.target.closest(".coffee-marker")) {
+            clearActiveShop();
+          }
+        });
       }
 
       // Generate coffee cards
@@ -649,6 +655,21 @@
         });
 
         document.getElementById("count").textContent = shops.length;
+      }
+
+      // Clear active shop
+      function clearActiveShop() {
+        document.querySelectorAll(".coffee-card").forEach((card) => {
+          card.classList.remove("active");
+        });
+
+        if (map) {
+          Object.entries(markers).forEach(
+            ([markerId, { marker, createIcon }]) => {
+              marker.setIcon(createIcon(false));
+            },
+          );
+        }
       }
 
       // Set active shop
