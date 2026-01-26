@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Dublin Coffee Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+        }
+
+        header {
+            background: linear-gradient(135deg, #6B4423 0%, #3E2723 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        #map {
+            height: calc(100vh - 140px);
+            width: 100%;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+        }
+
+        .popup-content h3 {
+            color: #6B4423;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .popup-content p {
+            margin: 0.3rem 0;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .popup-content .specialty {
+            font-style: italic;
+            color: #888;
+            margin-top: 0.5rem;
+        }
+
+        .custom-marker {
+            background-color: #6B4423;
+            border: 3px solid white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .custom-marker::after {
+            content: '☕';
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>☕ The Dublin Coffee Map</h1>
+        <p class="subtitle">Discover the best coffee spots in Dublin</p>
+    </header>
+    
+    <div id="map"></div>
+
+    <script>
+        // Wait for DOM and Leaflet to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize map centered on Dublin
+            const map = L.map('map').setView([53.3498, -6.2603], 13);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Coffee shop data - curated list of good Dublin coffee places
+        const coffeeShops = [
+            {
+                name: "3fe Coffee",
+                location: [53.3389, -6.2739],
+                area: "Grand Canal Dock",
+                specialty: "Award-winning specialty roaster, excellent flat whites"
+            },
+            {
+                name: "Proper Order Coffee",
+                location: [53.3452, -6.2654],
+                area: "Smithfield",
+                specialty: "Great brunch spot with quality espresso"
+            },
+            {
+                name: "Kaph",
+                location: [53.3429, -6.2591],
+                area: "Drury Street",
+                specialty: "Minimalist café with excellent pour-overs"
+            },
+            {
+                name: "The Fumbally",
+                location: [53.3366, -6.2707],
+                area: "The Liberties",
+                specialty: "Community café with organic coffee and healthy food"
+            },
+            {
+                name: "Brother Hubbard",
+                location: [53.3496, -6.2599],
+                area: "Capel Street",
+                specialty: "Middle Eastern-inspired with great coffee"
+            },
+            {
+                name: "Vice Coffee Inc.",
+                location: [53.3466, -6.2688],
+                area: "Abbey Street",
+                specialty: "Specialty roaster with industrial vibe"
+            },
+            {
+                name: "Wall & Keogh",
+                location: [53.3440, -6.2632],
+                area: "Richmond Street",
+                specialty: "Artisan roaster with cozy atmosphere"
+            },
+            {
+                name: "Two Pups Coffee",
+                location: [53.3311, -6.2522],
+                area: "Ranelagh",
+                specialty: "Dog-friendly with excellent coffee"
+            },
+            {
+                name: "Clement & Pekoe",
+                location: [53.3367, -6.2585],
+                area: "South William Street",
+                specialty: "Tea specialist with quality coffee too"
+            },
+            {
+                name: "Network",
+                location: [53.3431, -6.2481],
+                area: "Pearse Street",
+                specialty: "Specialty coffee with pastries"
+            },
+            {
+                name: "Brother Hubbard North",
+                location: [53.3549, -6.2605],
+                area: "North King Street",
+                specialty: "Northern location with same great coffee"
+            },
+            {
+                name: "Shoe Lane Coffee",
+                location: [53.3315, -6.2435],
+                area: "Ballsbridge",
+                specialty: "Neighborhood café with reliable quality"
+            }
+        ];
+
+        // Custom icon
+        const coffeeIcon = L.divIcon({
+            className: 'custom-marker',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
+            popupAnchor: [0, -15]
+        });
+
+        // Add markers for each coffee shop
+        coffeeShops.forEach(shop => {
+            const marker = L.marker(shop.location, { icon: coffeeIcon }).addTo(map);
+            
+            const popupContent = `
+                <div class="popup-content">
+                    <h3>${shop.name}</h3>
+                    <p><strong>📍 ${shop.area}</strong></p>
+                    <p class="specialty">${shop.specialty}</p>
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+        });
+        }); // End of DOMContentLoaded
+    </script>
+</body>
+</html>

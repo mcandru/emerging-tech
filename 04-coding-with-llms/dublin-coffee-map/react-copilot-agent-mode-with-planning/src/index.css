@@ -1,0 +1,102 @@
+@import url("https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;600;700&display=swap");
+@import "tailwindcss";
+
+:root {
+  --primary-color: #4a3b32;
+  --secondary-color: #d4a373;
+  --accent-color: #bc6c25;
+  --bg-color: #faf9f6;
+  --text-color: #2c241e;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: "Montserrat", sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.font-display {
+  font-family: "Lora", serif;
+}
+
+.shop-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+.leaflet-container {
+  font-family: "Montserrat", sans-serif;
+  background: #ddd;
+}
+
+.custom-icon {
+  background: transparent;
+  border: none;
+}
+
+.marker-pin {
+  width: 40px;
+  height: 40px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--primary-color);
+  position: absolute;
+  transform: rotate(-45deg);
+  left: 50%;
+  top: 50%;
+  margin: -15px 0 0 -15px;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 0.2s,
+    background 0.2s;
+}
+
+.marker-pin svg {
+  transform: rotate(45deg);
+  color: #fff;
+}
+
+.marker-pin:hover {
+  transform: rotate(-45deg) scale(1.1);
+  background: var(--accent-color);
+  z-index: 1000;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  width: 280px !important;
+}
+
+.popup-header {
+  background: var(--primary-color);
+  color: white;
+  padding: 10px 15px;
+  font-size: 1.1rem;
+}
+
+.popup-body {
+  padding: 15px;
+  font-size: 0.9rem;
+  color: #333;
+}

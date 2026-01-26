@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Dublin Coffee Map</title>
+
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+
+    <!-- Font Awesome for Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --primary-color: #4a3b32; /* Espresso */
+        --secondary-color: #d4a373; /* Latte foam */
+        --accent-color: #bc6c25; /* Roast */
+        --bg-color: #faf9f6; /* Cream */
+        --text-color: #2c241e;
+        --sidebar-width: 350px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Montserrat", sans-serif;
+        color: var(--text-color);
+        background-color: var(--bg-color);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* Header */
+      header {
+        background-color: var(--primary-color);
+        color: #fff;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+      }
+
+      header h1 {
+        font-family: "Lora", serif;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      header h1 i {
+        color: var(--secondary-color);
+      }
+
+      /* Layout */
+      .main-container {
+        display: flex;
+        flex: 1;
+        height: calc(100vh - 64px); /* Adjust based on header height */
+        position: relative;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        width: var(--sidebar-width);
+        background: #fff;
+        overflow-y: auto;
+        border-right: 1px solid #ddd;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.3s ease;
+        z-index: 900;
+      }
+
+      .sidebar-header {
+        padding: 1.5rem;
+        background: var(--bg-color);
+        border-bottom: 1px solid #eee;
+      }
+
+      .sidebar-header h2 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        color: var(--primary-color);
+      }
+
+      .sidebar-header p {
+        font-size: 0.85rem;
+        color: #666;
+        line-height: 1.4;
+      }
+
+      .shop-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .shop-item {
+        padding: 1.2rem 1.5rem;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        transition:
+          background-color 0.2s ease,
+          padding-left 0.2s ease;
+      }
+
+      .shop-item:hover {
+        background-color: #faf5f0;
+        padding-left: 1.8rem;
+      }
+
+      .shop-item.active {
+        background-color: #f0e6dd; /* Light mocha */
+        border-left: 4px solid var(--accent-color);
+      }
+
+      .shop-name {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--primary-color);
+        margin-bottom: 0.3rem;
+      }
+
+      .shop-area {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--accent-color);
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+      }
+
+      .shop-desc {
+        font-size: 0.85rem;
+        color: #555;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      /* Map */
+      #map {
+        flex: 1;
+        height: 100%;
+        background-color: #ddd;
+        z-index: 1;
+      }
+
+      /* Mobile Toggle */
+      .mobile-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+
+      /* Leaflet Customizations */
+      .custom-icon {
+        background: transparent;
+        border: none;
+      }
+
+      .marker-pin {
+        width: 40px;
+        height: 40px;
+        border-radius: 50% 50% 50% 0;
+        background: var(--primary-color);
+        position: absolute;
+        transform: rotate(-45deg);
+        left: 50%;
+        top: 50%;
+        margin: -15px 0 0 -15px;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          transform 0.2s,
+          background 0.2s;
+      }
+
+      .marker-pin i {
+        transform: rotate(45deg);
+        color: #fff;
+        font-size: 16px;
+      }
+
+      .marker-pin:hover {
+        transform: rotate(-45deg) scale(1.1);
+        background: var(--accent-color);
+        z-index: 1000;
+      }
+
+      .leaflet-popup-content-wrapper {
+        border-radius: 8px;
+        padding: 0;
+        overflow: hidden;
+        box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+      }
+
+      .leaflet-popup-content {
+        margin: 0;
+        width: 280px !important;
+      }
+
+      .popup-header {
+        background: var(--primary-color);
+        color: white;
+        padding: 10px 15px;
+        font-family: "Lora", serif;
+        font-size: 1.1rem;
+      }
+
+      .popup-body {
+        padding: 15px;
+        font-size: 0.9rem;
+        color: #333;
+      }
+
+      .popup-address {
+        font-style: italic;
+        color: #666;
+        margin-top: 8px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 5px;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .mobile-toggle {
+          display: block;
+        }
+
+        .sidebar {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 85%;
+          max-width: 320px;
+          transform: translateX(-100%);
+          box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar.open {
+          transform: translateX(0);
+        }
+
+        /* Overlay when sidebar is open */
+        .overlay {
+          display: none;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 800;
+        }
+
+        .overlay.active {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1><i class="fas fa-mug-hot"></i> Dublin Coffee Map</h1>
+      <button class="mobile-toggle" id="toggleSidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+    </header>
+
+    <div class="main-container">
+      <div class="overlay" id="overlay"></div>
+
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <h2>Curated Selection</h2>
+          <p>
+            A guide to the finest specialty coffee shops across Dublin City,
+            from historic cafes to modern micro-roasters.
+          </p>
+        </div>
+        <ul class="shop-list" id="shopList">
+          <!-- List items will be populated by JS -->
+        </ul>
+      </aside>
+
+      <div id="map"></div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+
+    <script>
+      // Data: The Dublin Coffee List
+      const coffeeShops = [
+        {
+          id: 1,
+          name: "3fe",
+          area: "Grand Canal Dock",
+          address: "32-34 Grand Canal Street Lower, Dublin 2",
+          coords: [53.3396, -6.2427],
+          description:
+            "The pioneer of Dublin's third-wave coffee scene. Exceptional roasts, minimalist industrial vibes, and a legendary tasting menu.",
+        },
+        {
+          id: 2,
+          name: "Kaph",
+          area: "Creative Quarter",
+          address: "31 Drury Street, Dublin 2",
+          coords: [53.3419, -6.2638],
+          description:
+            "A hip, two-story independent coffee shop. Known for playing great vinyl, matcha lattes, and a paleo-friendly treat selection.",
+        },
+        {
+          id: 3,
+          name: "Brother Hubbard (North)",
+          area: "Capel Street",
+          address: "153 Capel Street, Dublin 1",
+          coords: [53.3468, -6.2687],
+          description:
+            "Famous for its Middle Eastern-influenced brunch and excellent coffee. The Capel Street location is vibrant and spacious.",
+        },
+        {
+          id: 4,
+          name: "Clement & Pekoe",
+          area: "South William St",
+          address: "50 South William Street, Dublin 2",
+          coords: [53.3414, -6.2625],
+          description:
+            "A community favorite with a famous street bench for people-watching. They offer a rotating guest espresso and loose-leaf teas.",
+        },
+        {
+          id: 5,
+          name: "Two Boys Brew",
+          area: "Phibsborough",
+          address: "375 North Circular Road, Dublin 7",
+          coords: [53.3592, -6.2762],
+          description:
+            "A destination cafe in D7. Australian-style brunch, bright interiors, and consistently perfect flat whites.",
+        },
+        {
+          id: 6,
+          name: "Cloud Picker",
+          area: "Pearse Street",
+          address: "42 Pearse Street, Dublin 2",
+          coords: [53.3444, -6.2464],
+          description:
+            "Located in the historic Science Gallery building. They roast their own beans and serve creative, seasonal breakfast dishes.",
+        },
+        {
+          id: 7,
+          name: "The Fumbally",
+          area: "The Liberties",
+          address: "Fumbally Lane, Dublin 8",
+          coords: [53.3369, -6.2729],
+          description:
+            "A warehouse-style cafe and community hub. Rustic, wholesome food and a relaxed atmosphere that encourages lingering.",
+        },
+        {
+          id: 8,
+          name: "Bewley's Grafton Street",
+          area: "Grafton Street",
+          address: "78-79 Grafton Street, Dublin 2",
+          coords: [53.3409, -6.2608],
+          description:
+            "An iconic Dublin landmark since 1927. Famous for its stained glass windows, mahogany interior, and traditional table service.",
+        },
+        {
+          id: 9,
+          name: "Proper Order Coffee Co",
+          area: "Smithfield",
+          address: "7 Haymarket, Smithfield, Dublin 7",
+          coords: [53.3475, -6.2783],
+          description:
+            "Award-winning baristas serving some of the technically best coffee in the city. A small shop with a huge reputation.",
+        },
+        {
+          id: 10,
+          name: "Coffeeangel",
+          area: "Trinity Street",
+          address: "3 Trinity Street, Dublin 2",
+          coords: [53.3438, -6.2612],
+          description:
+            "Reliable, high-quality coffee founded by barista champion Karl Purdy. Efficient service and great beans.",
+        },
+        {
+          id: 11,
+          name: "Vice Coffee Inc",
+          area: "Abbey Street",
+          address: "54 Middle Abbey Street, Dublin 1",
+          coords: [53.3486, -6.2612],
+          description:
+            "Located inside the Wigwam building. Known for its edgy vibe, multi-roaster approach, and signature Irish coffees.",
+        },
+        {
+          id: 12,
+          name: "Love Supreme",
+          area: "Stoneybatter",
+          address: "57 Manor Street, Stoneybatter, Dublin 7",
+          coords: [53.3546, -6.2868],
+          description:
+            "A neighborhood gem in trendy Stoneybatter. Known for its signature pies and excellent artisan coffee.",
+        },
+        {
+          id: 13,
+          name: "Two Pups Coffee",
+          area: "The Liberties",
+          address: "74 Francis Street, Dublin 8",
+          coords: [53.3389, -6.2747],
+          description:
+            "Set in the antiques quarter, this spot loves dogs and serves top-tier coffee alongside hearty brunch options.",
+        },
+        {
+          id: 14,
+          name: "Shoe Lane Coffee",
+          area: "Tara Street",
+          address: "7 Tara Street, Dublin 2",
+          coords: [53.3467, -6.2558],
+          description:
+            "Charming cafe with old-world decor featuring a vintage bicycle. A great pitstop near the Dart station.",
+        },
+        {
+          id: 15,
+          name: "Beanhive",
+          area: "Dawson Street",
+          address: "26 Dawson Street, Dublin 2",
+          coords: [53.3398, -6.2588],
+          description:
+            "Famous for their incredibly cute latte art (think hedgehogs and bears) and cozy, friendly service.",
+        },
+      ];
+
+      // Initialize Map
+      // Centered roughly between Liffey sides
+      const map = L.map("map", {
+        zoomControl: false, // We'll move it
+      }).setView([53.345, -6.2603], 14);
+
+      // Move zoom control to top right
+      L.control
+        .zoom({
+          position: "topright",
+        })
+        .addTo(map);
+
+      // Add OpenStreetMap Tile Layer
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+        {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: "abcd",
+          maxZoom: 20,
+        },
+      ).addTo(map);
+
+      // Custom Icon Function
+      const createCustomIcon = () => {
+        return L.divIcon({
+          className: "custom-icon",
+          html: `<div class="marker-pin"><i class="fas fa-coffee"></i></div>`,
+          iconSize: [40, 40],
+          iconAnchor: [20, 40], // center bottom
+          popupAnchor: [0, -45],
+        });
+      };
+
+      const markers = {};
+      const shopListEl = document.getElementById("shopList");
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("overlay");
+      const toggleBtn = document.getElementById("toggleSidebar");
+
+      // Populate Map and List
+      coffeeShops.forEach((shop) => {
+        // Add Marker
+        const marker = L.marker(shop.coords, {
+          icon: createCustomIcon(),
+        }).addTo(map);
+
+        // Popup Content
+        const popupContent = `
+                <div class="popup-header">${shop.name}</div>
+                <div class="popup-body">
+                    <strong>${shop.area}</strong><br>
+                    ${shop.description}
+                    <div class="popup-address">
+                        <i class="fas fa-map-marker-alt"></i> ${shop.address}
+                    </div>
+                </div>
+            `;
+
+        marker.bindPopup(popupContent);
+        markers[shop.id] = marker;
+
+        // Add List Item
+        const li = document.createElement("li");
+        li.className = "shop-item";
+        li.innerHTML = `
+                <div class="shop-name">${shop.name}</div>
+                <div class="shop-area">${shop.area}</div>
+                <div class="shop-desc">${shop.description}</div>
+            `;
+
+        // Click Event for List Item
+        li.addEventListener("click", () => {
+          // Highlight List Item
+          document
+            .querySelectorAll(".shop-item")
+            .forEach((item) => item.classList.remove("active"));
+          li.classList.add("active");
+
+          // Move Map
+          map.flyTo(shop.coords, 16, {
+            animate: true,
+            duration: 1.5,
+          });
+
+          // Open Popup
+          marker.openPopup();
+
+          // On mobile, close sidebar after selection
+          if (window.innerWidth <= 768) {
+            closeSidebar();
+          }
+        });
+
+        shopListEl.appendChild(li);
+      });
+
+      // Mobile Sidebar Logic
+      function openSidebar() {
+        sidebar.classList.add("open");
+        overlay.classList.add("active");
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove("open");
+        overlay.classList.remove("active");
+      }
+
+      toggleBtn.addEventListener("click", () => {
+        if (sidebar.classList.contains("open")) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
+      });
+
+      overlay.addEventListener("click", closeSidebar);
+    </script>
+  </body>
+</html>

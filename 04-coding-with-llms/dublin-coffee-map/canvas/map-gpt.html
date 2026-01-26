@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Dublin Coffee Map</title>
+
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+
+    <style>
+      body {
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        background: #f7f5f2;
+        color: #2b2b2b;
+      }
+
+      header {
+        padding: 1rem 1.25rem;
+        background: #3b2f2f;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+      }
+
+      header p {
+        margin: 0.25rem 0 0;
+        font-size: 0.95rem;
+        opacity: 0.9;
+      }
+
+      #map {
+        width: 100%;
+        height: calc(100vh - 88px);
+      }
+
+      .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+      }
+
+      .coffee-popup h3 {
+        margin: 0 0 0.25rem;
+        font-size: 1.05rem;
+      }
+
+      .coffee-popup p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #555;
+      }
+
+      footer {
+        padding: 0.5rem 1rem;
+        background: #efeae4;
+        font-size: 0.75rem;
+        text-align: center;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>The Dublin Coffee Map</h1>
+      <p>A curated map of great coffee spots around Dublin ☕</p>
+    </header>
+
+    <div id="map"></div>
+
+    <footer>Data curated manually – add your favourites!</footer>
+
+    <!-- Leaflet JS -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+
+    <script>
+      // Initialize map centered on Dublin
+      const map = L.map("map").setView([53.3498, -6.2603], 13);
+
+      // OpenStreetMap tiles
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "© OpenStreetMap contributors",
+      }).addTo(map);
+
+      // Coffee shop data
+      const coffeeSpots = [
+        {
+          name: "3FE Coffee",
+          description: "Specialty coffee pioneers with multiple locations",
+          lat: 53.3376,
+          lng: -6.2651,
+        },
+        {
+          name: "Brother Hubbard (North)",
+          description: "Brunch and excellent coffee",
+          lat: 53.3521,
+          lng: -6.2636,
+        },
+        {
+          name: "Vice Coffee Inc",
+          description: "Modern espresso bar near the Liffey",
+          lat: 53.3469,
+          lng: -6.2587,
+        },
+        {
+          name: "Proper Order Coffee Co.",
+          description: "Friendly neighbourhood café",
+          lat: 53.3426,
+          lng: -6.2923,
+        },
+        {
+          name: "Cloud Picker Coffee",
+          description: "Roastery and café in Phibsborough",
+          lat: 53.3613,
+          lng: -6.2784,
+        },
+        {
+          name: "Two Pups Coffee",
+          description: "Small, cosy café with great pastries",
+          lat: 53.3387,
+          lng: -6.2681,
+        },
+      ];
+
+      // Add markers
+      coffeeSpots.forEach((spot) => {
+        const popupContent = `
+        <div class="coffee-popup">
+          <h3>${spot.name}</h3>
+          <p>${spot.description}</p>
+        </div>
+      `;
+
+        L.marker([spot.lat, spot.lng]).addTo(map).bindPopup(popupContent);
+      });
+    </script>
+  </body>
+</html>
