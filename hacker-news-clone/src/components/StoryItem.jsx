@@ -1,4 +1,6 @@
-const StoryItem = ({ story, onCommentClick }) => {
+import { Link } from 'react-router-dom';
+
+const StoryItem = ({ story }) => {
   const formatDate = (timestamp) => {
     if (!timestamp) return '';
     const date = new Date(timestamp);
@@ -44,12 +46,12 @@ const StoryItem = ({ story, onCommentClick }) => {
         <span className="story-separator"> | </span>
         <span className="story-time">{formatDate(story.created_at)}</span>
         <span className="story-separator"> | </span>
-        <button
-          onClick={() => onCommentClick(story.objectID)}
+        <Link
+          to={`/story/${story.objectID}`}
           className="story-comments-link"
         >
           {story.num_comments || 0} comments
-        </button>
+        </Link>
       </div>
     </div>
   );

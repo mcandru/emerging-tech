@@ -49,7 +49,7 @@ body {
   gap: 1rem;
 }
 
-.nav button {
+.nav a {
   background: none;
   border: none;
   color: #000;
@@ -60,11 +60,11 @@ body {
   text-decoration: none;
 }
 
-.nav button:hover {
+.nav a:hover {
   text-decoration: underline;
 }
 
-.nav button.active {
+.nav a.active {
   text-decoration: underline;
   font-weight: bold;
 }
@@ -199,15 +199,12 @@ body {
   background-color: #ff7f29;
 }
 
-/* Comment link button in story item */
+/* Comment link in story item */
 .story-comments-link {
-  background: none;
-  border: none;
   color: #828282;
   cursor: pointer;
   font-size: 0.75rem;
   font-family: Verdana, Geneva, sans-serif;
-  padding: 0;
   text-decoration: none;
 }
 

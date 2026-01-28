@@ -1,27 +1,34 @@
 import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { fetchStoryById } from '../services/api';
 import Comment from './Comment';
 
-const StoryDetail = ({ storyId, onBack }) => {
+const StoryDetail = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [story, setStory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     loadStory();
-  }, [storyId]);
+  }, [id]);
 
   const loadStory = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await fetchStoryById(storyId);
+      const data = await fetchStoryById(id);
       setStory(data);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBack = () => {
+    navigate(-1);
   };
 
   const getDomain = (url) => {
@@ -56,7 +63,7 @@ const StoryDetail = ({ storyId, onBack }) => {
     return (
       <div className="error-container">
         <div className="error">Error: {error}</div>
-        <button onClick={onBack} className="back-button">Go Back</button>
+        <button onClick={handleBack} className="back-button">Go Back</button>
       </div>
     );
   }
@@ -65,14 +72,14 @@ const StoryDetail = ({ storyId, onBack }) => {
     return (
       <div className="error-container">
         <div className="error">Story not found</div>
-        <button onClick={onBack} className="back-button">Go Back</button>
+        <button onClick={handleBack} className="back-button">Go Back</button>
       </div>
     );
   }
 
   return (
     <div className="story-detail">
-      <button onClick={onBack} className="back-button">← Back</button>
+      <button onClick={handleBack} className="back-button">← Back</button>
       
       <div className="story-detail-header">
         <div className="story-detail-title">

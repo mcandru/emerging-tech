@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { searchStories } from '../services/api';
 import StoryItem from './StoryItem';
 
-const Search = ({ onCommentClick }) => {
+const Search = () => {
   const [query, setQuery] = useState('');
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -60,7 +60,7 @@ const Search = ({ onCommentClick }) => {
 
       <div className="story-list">
         {stories.map((story, index) => (
-          <StoryItem key={story.objectID || index} story={story} onCommentClick={onCommentClick} />
+          <StoryItem key={story.objectID || index} story={story} />
         ))}
         
         {loading && <div className="loading">Loading...</div>}

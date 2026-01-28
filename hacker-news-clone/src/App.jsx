@@ -1,70 +1,60 @@
-import { useState } from 'react'
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
 import './App.css'
 import StoryList from './components/StoryList'
 import Search from './components/Search'
 import StoryDetail from './components/StoryDetail'
 
-function App() {
-  const [activeTab, setActiveTab] = useState('top')
-  const [selectedStoryId, setSelectedStoryId] = useState(null)
-
-  const handleCommentClick = (storyId) => {
-    setSelectedStoryId(storyId)
-  }
-
-  const handleBack = () => {
-    setSelectedStoryId(null)
-  }
+function Header() {
+  const location = useLocation()
+  const activeTab = location.pathname === '/search' ? 'search' : location.pathname === '/new' ? 'new' : 'top'
 
   return (
-    <div className="app">
-      <header className="header">
-        <div className="header-content">
-          <h1 className="logo">
-            <span className="logo-icon">Y</span> Hacker News
-          </h1>
-          <nav className="nav">
-            <button 
-              className={activeTab === 'top' ? 'active' : ''} 
-              onClick={() => {
-                setActiveTab('top')
-                setSelectedStoryId(null)
-              }}
-            >
-              Top
-            </button>
-            <button 
-              className={activeTab === 'new' ? 'active' : ''} 
-              onClick={() => {
-                setActiveTab('new')
-                setSelectedStoryId(null)
-              }}
-            >
-              New
-            </button>
-            <button 
-              className={activeTab === 'search' ? 'active' : ''} 
-              onClick={() => {
-                setActiveTab('search')
-                setSelectedStoryId(null)
-              }}
-            >
-              Search
-            </button>
-          </nav>
-        </div>
-      </header>
-      
-      <main className="main-content">
-        {selectedStoryId ? (
-          <StoryDetail storyId={selectedStoryId} onBack={handleBack} />
-        ) : activeTab === 'search' ? (
-          <Search onCommentClick={handleCommentClick} />
-        ) : (
-          <StoryList filter={activeTab} onCommentClick={handleCommentClick} />
-        )}
-      </main>
-    </div>
+    <header className="header">
+      <div className="header-content">
+        <h1 className="logo">
+          <span className="logo-icon">Y</span> Hacker News
+        </h1>
+        <nav className="nav">
+          <Link 
+            to="/"
+            className={activeTab === 'top' ? 'active' : ''}
+          >
+            Top
+          </Link>
+          <Link 
+            to="/new"
+            className={activeTab === 'new' ? 'active' : ''}
+          >
+            New
+          </Link>
+          <Link 
+            to="/search"
+            className={activeTab === 'search' ? 'active' : ''}
+          >
+            Search
+          </Link>
+        </nav>
+      </div>
+    </header>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <div className="app">
+        <Header />
+        
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<StoryList filter="top" />} />
+            <Route path="/new" element={<StoryList filter="new" />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/story/:id" element={<StoryDetail />} />
+          </Routes>
+        </main>
+      </div>
+    </BrowserRouter>
   )
 }
 
