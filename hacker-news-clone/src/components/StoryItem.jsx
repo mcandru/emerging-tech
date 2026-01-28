@@ -1,4 +1,4 @@
-const StoryItem = ({ story }) => {
+const StoryItem = ({ story, onCommentClick }) => {
   const formatDate = (timestamp) => {
     if (!timestamp) return '';
     const date = new Date(timestamp);
@@ -44,14 +44,12 @@ const StoryItem = ({ story }) => {
         <span className="story-separator"> | </span>
         <span className="story-time">{formatDate(story.created_at)}</span>
         <span className="story-separator"> | </span>
-        <a
-          href={`https://news.ycombinator.com/item?id=${story.objectID}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="story-comments"
+        <button
+          onClick={() => onCommentClick(story.objectID)}
+          className="story-comments-link"
         >
           {story.num_comments || 0} comments
-        </a>
+        </button>
       </div>
     </div>
   );

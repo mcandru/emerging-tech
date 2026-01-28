@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import StoryItem from './StoryItem';
 import { fetchTopStories, fetchNewStories } from '../services/api';
 
-const StoryList = ({ filter = 'top' }) => {
+const StoryList = ({ filter = 'top', onCommentClick }) => {
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -49,7 +49,7 @@ const StoryList = ({ filter = 'top' }) => {
   return (
     <div className="story-list">
       {stories.map((story, index) => (
-        <StoryItem key={story.objectID || index} story={story} />
+        <StoryItem key={story.objectID || index} story={story} onCommentClick={onCommentClick} />
       ))}
       
       {loading && <div className="loading">Loading...</div>}
