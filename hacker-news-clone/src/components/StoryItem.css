@@ -1,0 +1,65 @@
+.story-item {
+  padding: 5px 10px;
+  border-bottom: 1px solid #e6e6df;
+}
+
+.story-main {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.story-rank {
+  color: #828282;
+  font-size: 10pt;
+  min-width: 25px;
+  text-align: right;
+}
+
+.story-content {
+  flex: 1;
+}
+
+.story-title-row {
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.story-title {
+  color: #000;
+  font-size: 10pt;
+}
+
+.story-title:visited {
+  color: #828282;
+}
+
+.story-domain {
+  color: #828282;
+  font-size: 8pt;
+  margin-left: 5px;
+}
+
+.story-meta {
+  font-size: 7pt;
+  color: #828282;
+}
+
+.story-separator {
+  margin: 0 4px;
+}
+
+.story-points,
+.story-author,
+.story-time,
+.story-comments {
+  color: #828282;
+}
+
+.story-comments {
+  cursor: pointer;
+}
+
+.story-comments:hover {
+  text-decoration: underline;
+}
